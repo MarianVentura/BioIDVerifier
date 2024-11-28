@@ -1,0 +1,187 @@
+﻿@page "/usuario-registrar"
+@inject NavigationManager NavigationManager
+@inject UsuarioServices UsuarioServices
+
+<PageTitle>Registrar Usuario</PageTitle>
+
+<EditForm Model="@usuario" OnValidSubmit="GuardarUsuario">
+    <DataAnnotationsValidator />
+    <div class="container mt-4">
+        <div class="card shadow-lg" style="max-width: 500px; margin: 0 auto;">
+            @* Header *@
+            <div class="card-header d-flex flex-column align-items-center" style="background-color: #FB6107; color: white; text-align: center; padding: 30px 20px 20px;">
+                <div class="image-container" style="width: 90px; height: 90px; border-radius: 50%; background-color: white; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); margin-bottom: 15px;">
+                    <img src="https://www.iconpacks.net/icons/1/free-user-login-icon-305-thumb.png" alt="User Icon" style="width: 50px; height: 50px; border-radius: 50%;" />
+                </div>
+                <h2 style="font-family: 'Poppins', sans-serif; font-size: 1.5rem; font-weight: bold; letter-spacing: 1px; margin-bottom: 10px;">
+                    Registrar Usuario
+                </h2>
+            </div>
+
+            @* Body *@
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label" for="nombre" style="font-family: 'Poppins', sans-serif;"><strong>Nombre:</strong></label>
+                    <div class="input-group">
+                        <span class="input-group-text" style="background-color: #F3DE2C;">
+                            <i class="bi bi-person"></i> <!-- Icono de usuario -->
+                        </span>
+                        <InputText id="nombre" class="form-control" @bind-Value="usuario.Nombre" style="border: 1px solid gray;" required />
+                    </div>
+                    <ValidationMessage For="@(() => usuario.Nombre)" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" for="apellido" style="font-family: 'Poppins', sans-serif;"><strong>Apellido:</strong></label>
+                    <div class="input-group">
+                        <span class="input-group-text" style="background-color: #F3DE2C;">
+                            <i class="bi bi-person"></i> <!-- Icono de usuario -->
+                        </span>
+                        <InputText id="apellido" class="form-control" @bind-Value="usuario.Apellido" style="border: 1px solid gray;" required />
+                    </div>
+                    <ValidationMessage For="@(() => usuario.Apellido)" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" for="numeroCedula" style="font-family: 'Poppins', sans-serif;"><strong>Número de Cédula:</strong></label>
+                    <div class="input-group">
+                        <span class="input-group-text" style="background-color: #F3DE2C;">
+                            <i class="bi bi-person-vcard"></i> <!-- Icono de ID -->
+                        </span>
+                        <InputText id="numeroCedula" class="form-control" @bind-Value="usuario.NumeroCedula" style="border: 1px solid gray;" required />
+                    </div>
+                    <ValidationMessage For="@(() => usuario.NumeroCedula)" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" for="fotoCedula" style="font-family: 'Poppins', sans-serif;"><strong>Foto de la Cédula:</strong></label>
+                    <div class="input-group">
+                        <span class="input-group-text" style="background-color: #F3DE2C;">
+                            <i class="bi bi-image"></i> <!-- Icono de Imagen -->
+                        </span>
+                        <InputFile id="fotoCedula" OnChange="HandleFileChange" class="form-control" required />
+                    </div>
+                    <ValidationMessage For="@(() => usuario.FotoCedula)" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" for="huella" style="font-family: 'Poppins', sans-serif;"><strong>Huella Dactilar:</strong></label>
+                    <div class="input-group">
+                        <span class="input-group-text" style="background-color: #F3DE2C;">
+                            <i class="bi bi-fingerprint"></i> <!-- Icono de huella -->
+                        </span>
+                        <InputFile id="huella" OnChange="HandleHuellaChange" class="form-control" required />
+                    </div>
+                    <ValidationMessage For="@(() => usuario.Huella)" />
+                </div>
+            </div>
+
+            @* Footer *@
+            <div class="card-footer d-flex justify-content-between">
+                <button type="submit" class="btn" style="background-color: #FB6107; color: white;">
+                    <i class="fa-solid fa-save"></i> Guardar
+                </button>
+                <button type="button" class="btn" style="background-color: #2EC4B6; color: white;" @onclick="Volver">
+                    <i class="fa-solid fa-arrow-left"></i> Volver
+                </button>
+            </div>
+        </div>
+    </div>
+</EditForm>
+
+@code {
+    private Usuario usuario = new Usuario();
+
+    private async Task GuardarUsuario()
+    {
+        bool exito = await UsuarioServices.Guardar(usuario);
+        if (exito)
+        {
+            usuario = new Usuario();
+        }
+        else
+        {
+            // Mostrar mensaje de error
+        }
+    }
+
+    private async Task HandleFileChange(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (file != null)
+        {
+            var buffer = new byte[file.Size];
+            await file.OpenReadStream().ReadAsync(buffer);
+            usuario.FotoCedula = Convert.ToBase64String(buffer); // Guarda la foto en formato Base64
+        }
+    }
+
+    private async Task HandleHuellaChange(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (file != null)
+        {
+            var buffer = new byte[file.Size];
+            await file.OpenReadStream().ReadAsync(buffer);
+            usuario.Huella = buffer; // Guarda la huella como byte[]
+        }
+    }
+
+    private void Volver()
+    {
+        NavigationManager.NavigateTo("/");  // Redirige a la página de inicio
+    }
+}
+
+<style>
+    .card {
+        margin-top: 20px;
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        max-width: 500px; /* Tamaño reducido */
+        margin: 0 auto;
+    }
+
+    .card-header {
+        background-color: #FB6107; /* Naranja vibrante */
+        color: white;
+    }
+
+    .form-control {
+        border-radius: 5px;
+        border: 1px solid #7CB518; /* Verde lima */
+        font-size: 0.9rem;
+        padding: 8px;
+        background-color: #f8f9fa;
+    }
+
+        .form-control:focus {
+            border-color: #5C8001; /* Verde oscuro */
+            box-shadow: 0 0 5px rgba(92, 128, 1, 0.5);
+        }
+
+    .input-group-text {
+        background-color: #F3DE2C; /* Amarillo pastel */
+        color: black;
+    }
+
+    .btn {
+        font-size: 0.9rem;
+        padding: 8px 20px;
+        border-radius: 5px;
+        font-weight: bold;
+    }
+
+        .btn:hover {
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+    .btn-back {
+        background-color: #2EC4B6; /* Verde agua */
+    }
+
+    .btn-submit {
+        background-color: #FB6107; /* Naranja vibrante */
+    }
+</style>

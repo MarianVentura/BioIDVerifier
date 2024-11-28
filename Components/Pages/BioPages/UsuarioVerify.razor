@@ -1,0 +1,213 @@
+﻿@page "/usuario-verificar"
+@inject NavigationManager NavigationManager
+@inject UsuarioServices UsuarioServices
+
+<style>
+    /* Título de la página */
+    .titulo-verificar {
+        font-size: 2.5rem;
+        color: #FF9F1C;
+        font-weight: bold;
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    /* Contenedor del formulario */
+    .form-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #CBF3F0; /* Fondo suave */
+        border-radius: 10px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Estilo para los campos de entrada del formulario */
+    .form-control-custom {
+        border-radius: 10px;
+        padding: 12px;
+        border: 1px solid #FFBF69;
+        font-size: 1.1rem;
+        width: 100%;
+        margin-bottom: 15px;
+    }
+
+        .form-control-custom:focus {
+            border-color: #FF9F1C;
+            box-shadow: 0 0 5px rgba(255, 159, 28, 0.5);
+        }
+
+    /* Estilo para el botón de Verificar */
+    .btn-verificar {
+        background-color: #2EC4B6;
+        color: white;
+        border-radius: 50px;
+        padding: 12px 25px;
+        font-size: 1.2rem;
+        font-weight: bold;
+        border: none;
+        width: 100%;
+        transition: background-color 0.3s ease;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+        .btn-verificar:hover {
+            background-color: #29b0a8;
+        }
+
+    /* Estilo para los mensajes de verificación */
+    .mensaje-verificado {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #D95D39; /* Mantiene color para errores */
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    /* Estilo para los campos de archivo (Huella Dactilar y Cédula) */
+    .form-control-custom[type="file"] {
+        padding: 12px 0;
+    }
+
+    /* Estilo para el botón de Volver */
+    .btn-back {
+        background-color: #FFBF69;
+        color: white;
+        border-radius: 50px;
+        padding: 12px 25px;
+        font-size: 1.1rem;
+        font-weight: bold;
+        border: none;
+        width: 100%;
+        margin-top: 20px;
+        transition: background-color 0.3s ease;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+        .btn-back:hover {
+            background-color: #FF9F1C;
+        }
+
+        .btn-back i, .btn-verificar i {
+            margin-right: 10px;
+        }
+</style>
+
+
+<h3 class="titulo-verificar">Verificar Identidad</h3>
+
+<div class="form-container">
+    <!-- Campo para subir la foto de la cédula -->
+    <div class="form-group">
+        <label for="fotoCedula">Subir Foto de Cédula:</label>
+        <InputFile id="fotoCedula" OnChange="HandleCedulaChange" class="form-control form-control-custom" />
+    </div>
+
+    <!-- Campo para cargar la huella dactilar -->
+    <div class="form-group">
+        <label for="huella">Huella Dactilar:</label>
+        <InputFile id="huella" OnChange="HandleHuellaChange" class="form-control form-control-custom" />
+    </div>
+
+    <!-- Botón para verificar la identidad -->
+    <button @onclick="VerificarIdentidad" class="btn btn-verificar">
+        <i class="bi bi-fingerprint"></i> Verificar
+    </button>
+
+    <!-- Mensaje de verificación -->
+    @if (verificado != null)
+    {
+        <p class="mensaje-verificado">@verificado</p>
+    }
+
+    <!-- Botón para volver al inicio -->
+    <button @onclick="VolverHome" class="btn btn-back">
+        <i class="bi bi-arrow-left"></i> Volver a Inicio
+    </button>
+</div>
+
+@code {
+    private string numeroCedula;
+    private byte[] huella;
+    private byte[] fotoCedula;  // Para almacenar la foto de la cédula
+    private string? verificado;
+
+    // Verificar identidad con la foto de la cédula y la huella dactilar
+    private async Task VerificarIdentidad()
+    {
+        // Busca el usuario por número de cédula
+        var usuario = await UsuarioServices.Listar(u => u.NumeroCedula == numeroCedula);
+
+        if (usuario.Any())
+        {
+            var huellaRegistrada = usuario.First().Huella;
+            // Lógica de comparación de huellas
+            if (CompararHuella(huella, huellaRegistrada))
+            {
+                verificado = "Identidad Verificada";
+            }
+            else
+            {
+                verificado = "Huella no coincidente";
+            }
+        }
+        else
+        {
+            verificado = "Usuario no encontrado";
+        }
+    }
+
+    // Método para comparar las huellas (simulada)
+    private bool CompararHuella(byte[] huellaNueva, byte[] huellaRegistrada)
+    {
+        // Lógica de comparación de huellas (esto es solo un ejemplo)
+        return huellaNueva.SequenceEqual(huellaRegistrada);
+    }
+
+    // Maneja el cambio de la huella dactilar (archivo)
+    private async Task HandleHuellaChange(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (file != null)
+        {
+            var buffer = new byte[file.Size];
+            await file.OpenReadStream().ReadAsync(buffer);
+            huella = buffer; // Guarda la huella como byte[]
+        }
+    }
+
+    // Maneja el cambio de la foto de la cédula (archivo)
+    private async Task HandleCedulaChange(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (file != null)
+        {
+            var buffer = new byte[file.Size];
+            await file.OpenReadStream().ReadAsync(buffer);
+            fotoCedula = buffer; // Guarda la foto de la cédula como byte[]
+        }
+    }
+
+    // Método para volver a la página de inicio
+    private void VolverHome()
+    {
+        try
+        {
+            NavigationManager.NavigateTo("/");  // Redirige a la página de inicio
+        }
+        catch (Exception ex)
+        {
+            // Manejo del error en caso de que algo falle en la navegación
+            Console.WriteLine($"Error al intentar navegar: {ex.Message}");
+        }
+    }
+}

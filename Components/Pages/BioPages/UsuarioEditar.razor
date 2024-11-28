@@ -1,0 +1,144 @@
+﻿@page "/usuario-editar/{usuarioId:int}"
+@inject NavigationManager NavigationManager
+@inject UsuarioServices UsuarioServices
+
+<PageTitle>Editar Usuario</PageTitle>
+
+<EditForm Model="@usuario" OnValidSubmit="ActualizarUsuario">
+    <DataAnnotationsValidator />
+    <div class="container mt-4">
+        <div class="card shadow-lg" style="max-width: 500px; margin: 0 auto;">
+            @* Header *@
+            <div class="card-header d-flex flex-column align-items-center" style="background-color: #FB6107; color: white; text-align: center; padding: 30px 20px 20px;">
+                <div class="image-container" style="width: 90px; height: 90px; border-radius: 50%; background-color: white; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); margin-bottom: 15px;">
+                    <img src="https://www.iconpacks.net/icons/1/free-user-login-icon-305-thumb.png" alt="User Icon" style="width: 50px; height: 50px; border-radius: 50%;" />
+                </div>
+                <h2 style="font-family: 'Poppins', sans-serif; font-size: 1.5rem; font-weight: bold; letter-spacing: 1px; margin-bottom: 10px;">
+                    Editar Usuario
+                </h2>
+            </div>
+
+            @* Body *@
+            <div class="card-body">
+                @* Campos del formulario de usuario *@
+                <div class="mb-3">
+                    <label class="form-label" for="nombre" style="color: #5C8001;"><strong>Nombre:</strong></label>
+                    <div class="input-group">
+                        <span class="input-group-text" style="background-color: #F3DE2C; color: #5C8001;"><i class="bi bi-person"></i></span>
+                        <InputText id="nombre" class="form-control" @bind-Value="usuario.Nombre" required />
+                    </div>
+                    <ValidationMessage For="@(() => usuario.Nombre)" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" for="apellido" style="color: #5C8001;"><strong>Apellido:</strong></label>
+                    <div class="input-group">
+                        <span class="input-group-text" style="background-color: #F3DE2C; color: #5C8001;"><i class="bi bi-person"></i></span>
+                        <InputText id="apellido" class="form-control" @bind-Value="usuario.Apellido" required />
+                    </div>
+                    <ValidationMessage For="@(() => usuario.Apellido)" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" for="numeroCedula" style="color: #5C8001;"><strong>Número de Cédula:</strong></label>
+                    <div class="input-group">
+                        <span class="input-group-text" style="background-color: #F3DE2C; color: #5C8001;"><i class="bi bi-person-vcard"></i></span>
+                        <InputText id="numeroCedula" class="form-control" @bind-Value="usuario.NumeroCedula" required />
+                    </div>
+                    <ValidationMessage For="@(() => usuario.NumeroCedula)" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" for="fotoCedula" style="color: #5C8001;"><strong>Foto de la Cédula:</strong></label>
+                    <div class="input-group">
+                        <span class="input-group-text" style="background-color: #F3DE2C; color: #5C8001;"><i class="bi bi-image"></i></span>
+                        <InputFile id="fotoCedula" OnChange="HandleFileChange" class="form-control" />
+                    </div>
+                    <ValidationMessage For="@(() => usuario.FotoCedula)" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" for="huella" style="color: #5C8001;"><strong>Huella Dactilar:</strong></label>
+                    <div class="input-group">
+                        <span class="input-group-text" style="background-color: #F3DE2C; color: #5C8001;"><i class="bi bi-fingerprint"></i></span>
+                        <InputFile id="huella" OnChange="HandleHuellaChange" class="form-control" />
+                    </div>
+                    <ValidationMessage For="@(() => usuario.Huella)" />
+                </div>
+            </div>
+
+            @* Footer *@
+            <div class="card-footer d-flex justify-content-between">
+                <button type="submit" class="btn" style="background-color: #7CB518; color: white; font-weight: bold;">
+                    <i class="fa-solid fa-save"></i> Guardar
+                </button>
+                <button type="button" class="btn" style="background-color: #FB6107; color: white; font-weight: bold;" @onclick="Volver">
+                    <i class="fa-solid fa-arrow-left"></i> Volver
+                </button>
+            </div>
+        </div>
+    </div>
+</EditForm>
+
+@code {
+    private Usuario usuario = new Usuario();
+    [Parameter] public int UsuarioId { get; set; }  // Parámetro de la URL para el usuario a editar
+
+    // Método para inicializar los datos del usuario a editar
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            usuario = await UsuarioServices.Buscar(UsuarioId); // Carga los datos del usuario a editar
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al cargar el usuario: {ex.Message}");
+        }
+    }
+
+    // Método para actualizar el usuario
+    private async Task ActualizarUsuario()
+    {
+        bool exito = await UsuarioServices.Guardar(usuario); // Usa el mismo método Guardar, que maneja tanto crear como editar
+        if (exito)
+        {
+            NavigationManager.NavigateTo("/usuarios"); // Redirige después de guardar
+        }
+        else
+        {
+            // Manejar el error
+            Console.WriteLine("No se pudo actualizar el usuario");
+        }
+    }
+
+    // Método para manejar la carga de la foto de cédula
+    private async Task HandleFileChange(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (file != null)
+        {
+            var buffer = new byte[file.Size];
+            await file.OpenReadStream().ReadAsync(buffer);
+            usuario.FotoCedula = Convert.ToBase64String(buffer); // Guarda la foto en formato Base64
+        }
+    }
+
+    // Método para manejar la carga de la huella dactilar
+    private async Task HandleHuellaChange(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (file != null)
+        {
+            var buffer = new byte[file.Size];
+            await file.OpenReadStream().ReadAsync(buffer);
+            usuario.Huella = buffer; // Guarda la huella como byte[]
+        }
+    }
+
+    // Método para redirigir a la lista de usuarios
+    private void Volver()
+    {
+        NavigationManager.NavigateTo("/usuarios");  // Redirige a la lista de usuarios
+    }
+}

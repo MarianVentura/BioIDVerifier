@@ -1,0 +1,112 @@
+﻿@page "/usuario-detalles/{usuarioId:int}"
+@inject UsuarioServices UsuarioServices
+@inject NavigationManager NavigationManager
+
+<PageTitle>Detalles del Usuario</PageTitle>
+
+<div class="container mt-5">
+    <div class="card shadow-lg" style="max-width: 600px; margin: 0 auto;">
+        @* Header *@
+        <div class="card-header" style="background-color: #FB6107; color: white; text-align: center;">
+            <h2 style="font-family: 'Poppins', sans-serif; font-size: 1.6rem; font-weight: bold; margin: 15px 0;">
+                Detalles del Usuario
+            </h2>
+        </div>
+
+        @* Body *@
+        <div class="card-body">
+            @if (usuario == null)
+            {
+                <p>El usuario no se encuentra disponible.</p>
+            }
+            else
+            {
+                <!-- Nombre -->
+                <div class="mb-4">
+                    <label class="form-label" style="font-family: 'Poppins', sans-serif; font-weight: bold; color: #5C8001;">
+                        Nombre:
+                    </label>
+                    <div class="input-group form-group">
+                        <span class="input-group-text" style="background-color: #F3DE2C;">
+                            <i class="bi bi-person" style="color: #FB6107;"></i> <!-- Icono de usuario -->
+                        </span>
+                        <input type="text" class="form-control" value="@usuario.Nombre" readonly style="border-color: #FB6107;" />
+                    </div>
+                </div>
+
+                <!-- Apellido -->
+                <div class="mb-4">
+                    <label class="form-label" style="font-family: 'Poppins', sans-serif; font-weight: bold; color: #5C8001;">
+                        Apellido:
+                    </label>
+                    <div class="input-group form-group">
+                        <span class="input-group-text" style="background-color: #F3DE2C;">
+                            <i class="bi bi-person" style="color: #FB6107;"></i> <!-- Icono de usuario -->
+                        </span>
+                        <input type="text" class="form-control" value="@usuario.Apellido" readonly style="border-color: #FB6107;" />
+                    </div>
+                </div>
+
+                <!-- Número de Cédula -->
+                <div class="mb-4">
+                    <label class="form-label" style="font-family: 'Poppins', sans-serif; font-weight: bold; color: #5C8001;">
+                        Número de Cédula:
+                    </label>
+                    <div class="input-group form-group">
+                        <span class="input-group-text" style="background-color: #F3DE2C;">
+                            <i class="bi bi-person-vcard" style="color: #FB6107;"></i> <!-- Icono de ID -->
+                        </span>
+                        <input type="text" class="form-control" value="@usuario.NumeroCedula" readonly style="border-color: #FB6107;" />
+                    </div>
+                </div>
+
+                <!-- Foto de la Cédula -->
+                <div class="mb-4">
+                    <label class="form-label" style="font-family: 'Poppins', sans-serif; font-weight: bold; color: #5C8001;">
+                        Foto de la Cédula:
+                    </label>
+                    <div class="image-container" style="text-align: center;">
+                        @if (!string.IsNullOrEmpty(usuario.FotoCedula))
+                        {
+                            <img src="data:image/jpeg;base64,@usuario.FotoCedula" alt="Foto de la cédula" style="max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);" />
+                        }
+                        else
+                        {
+                            <p>No hay foto disponible</p>
+                        }
+                    </div>
+                </div>
+
+                <!-- Huella Dactilar -->
+                <div class="mb-4">
+                    <label class="form-label" style="font-family: 'Poppins', sans-serif; font-weight: bold; color: #5C8001;">
+                        Huella Dactilar:
+                    </label>
+                    <p>@(usuario.Huella != null ? "Huella registrada" : "Sin huella registrada")</p>
+                </div>
+            }
+        </div>
+
+        @* Footer *@
+        <div class="card-footer d-flex justify-content-end">
+            <button class="btn btn-back" @onclick="Volver" style="background-color: #7CB518; color: white; font-weight: bold;">
+                <i class="fa-solid fa-arrow-left"></i> Volver
+            </button>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public int UsuarioId { get; set; }
+    private Usuario usuario;
+
+    protected override async Task OnInitializedAsync()
+    {
+        usuario = await UsuarioServices.Buscar(UsuarioId); // Cargar datos del usuario
+    }
+
+    private void Volver()
+    {
+        NavigationManager.NavigateTo("/usuarios");  // Redirige a la lista de usuarios
+    }
+}

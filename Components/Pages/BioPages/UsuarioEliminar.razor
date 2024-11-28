@@ -1,0 +1,73 @@
+﻿@page "/usuario-eliminar/{UsuarioId}"
+@inject UsuarioServices UsuarioServices
+@inject NavigationManager NavigationManager
+
+<PageTitle>Eliminar Usuario</PageTitle>
+
+<div class="container mt-5">
+    <div class="card shadow-lg" style="max-width: 600px; margin: 0 auto;">
+        <div class="card-header" style="background-color: #FF9F1C; color: white; text-align: center;">
+            <h2 style="font-family: 'Poppins', sans-serif; font-size: 1.6rem; font-weight: bold; margin: 15px 0;">
+                Eliminar Usuario
+            </h2>
+        </div>
+
+        <div class="card-body text-center">
+            <!-- Mensaje de confirmación inicial -->
+            <p>¿Estás seguro de que deseas eliminar al usuario con ID: @UsuarioId?</p>
+
+            <button class="btn btn-danger" @onclick="MostrarConfirmacion">Eliminar</button>
+            <button class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de confirmación -->
+@if (mostrarConfirmacion)
+{
+    <div class="modal fade show" style="display:block; background: rgba(0,0,0,0.5);" tabindex="-1" role="dialog" aria-labelledby="modalConfirmacion" aria-hidden="false">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalConfirmacion">Confirmación de Eliminación</h5>
+                    <button type="button" class="close" @onclick="Cancelar">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>¿Estás seguro de que deseas eliminar al usuario con ID: @UsuarioId?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" @onclick="EliminarUsuario">Confirmar</button>
+                    <button type="button" class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public int UsuarioId { get; set; }
+
+    private bool mostrarConfirmacion = false;
+
+    // Mostrar modal de confirmación
+    private void MostrarConfirmacion()
+    {
+        mostrarConfirmacion = true;  // Muestra el modal
+    }
+
+    // Confirmar la eliminación
+    private async Task EliminarUsuario()
+    {
+        await UsuarioServices.Eliminar(UsuarioId);
+        NavigationManager.NavigateTo("/usuarios");
+    }
+
+    // Cancelar la eliminación
+    private void Cancelar()
+    {
+        mostrarConfirmacion = false;  // Cierra el modal sin hacer nada
+        NavigationManager.NavigateTo("/usuarios");
+    }
+}

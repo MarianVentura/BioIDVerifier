@@ -1,0 +1,163 @@
+﻿@inherits LayoutComponentBase
+
+<div class="navbar navbar-expand-lg fixed-top custom-navbar" id="NavigationBar">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/" style="font-family: 'Poppins', sans-serif; font-size: 1.8rem; color: #0E1428;">BioIDVerifier</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon" style="background-color: #0E1428;"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <!-- Home - Icono de huella -->
+                <li class="nav-item">
+                    <NavLink class="nav-link" href="/" Match="NavLinkMatch.All">
+                        <span class="bi bi-fingerprint" aria-hidden="true" style="font-size: 1.4rem;"></span> Inicio
+                    </NavLink>
+                </li>
+                <!-- Verificar Identidad -->
+                <li class="nav-item">
+                    <NavLink class="nav-link" href="/usuario-verificar">
+                        <span class="bi bi-person-check-fill" aria-hidden="true" style="font-size: 1.4rem;"></span> Verificar Identidad
+                    </NavLink>
+                </li>
+                <!-- Contacto -->
+                <li class="nav-item">
+                    <NavLink class="nav-link" href="/contacto">
+                        <span class="bi bi-envelope-fill" aria-hidden="true" style="font-size: 1.4rem;"></span> Contacto
+                    </NavLink>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<main class="flex-grow-1 p-4 mt-5 pt-5 bg-white">
+    <div class="top-row d-flex justify-content-between align-items-center mb-4 bg-white p-2 top-rower" style="margin-top: 20px;">
+        <h5 style="font-family: 'Permanent Marker', sans-serif; font-weight: bold; color: #FBB02D;" class="fw-bold">
+            <strong style="width: 50px; height: 50px; margin-right: 15px;">
+                <i class="fa-solid fa-fingerprint"></i> BioIDVerifier
+            </strong>
+        </h5>
+    </div>
+
+    <article class="content bg-white">
+        @Body
+    </article>
+</main>
+
+<style>
+    /* Navbar */
+    .custom-navbar {
+        background-color: #FB6107; /* Naranja brillante */
+        transition: background-color 0.3s ease-in-out;
+    }
+
+    .navbar-brand {
+        font-size: 1.8rem;
+        font-weight: bold;
+        color: #FFFFFF; /* Blanco para el texto del logo */
+    }
+
+    /* Enlaces de la barra de navegación */
+    .nav-link {
+        transition: color 0.3s ease;
+        font-size: 1.2rem;
+        color: #FFFFFF; /* Blanco por defecto */
+        font-weight: 500;
+    }
+
+        .nav-link:hover {
+            color: #FFF; /* Texto blanco al hacer hover */
+            background-color: #FBB02D; /* Amarillo anaranjado al hacer hover */
+            border-radius: 5px;
+        }
+
+    .nav-item {
+        padding: 10px 20px;
+    }
+
+    /* Cambio de fondo en la navbar cuando se hace scroll */
+    .custom-navbar.scrolled {
+        background-color: #F3DE2C; /* Amarillo suave al hacer scroll */
+    }
+
+    /* Iconos */
+    .bi {
+        margin-right: 8px;
+        font-size: 1.4rem;
+    }
+
+    .navbar-toggler-icon {
+        background-color: #FFFFFF; /* Blanco para el icono de la navbar */
+    }
+
+    /* Fondo principal */
+    main {
+        background-color: #FFFFFF; /* Fondo blanco para el cuerpo */
+        color: #0E1428; /* Color oscuro para el texto */
+    }
+
+    /* Fondo de las secciones */
+    .top-row {
+        background-color: #FBB02D; /* Amarillo anaranjado para la cabecera */
+        color: #0E1428;
+    }
+
+    /* Botones y enlaces */
+    .btn-verificar {
+        background-color: #7CB518;
+        color: white;
+        border-radius: 50px;
+        padding: 12px 25px;
+        font-size: 1.2rem;
+        font-weight: bold;
+        border: none;
+        transition: background-color 0.3s ease;
+    }
+
+        .btn-verificar:hover {
+            background-color: #5C8001; /* Hover de color verde oliva más oscuro */
+        }
+
+    /* Cambio de color de fondo en el body */
+    body {
+        background-color: #FFF; /* Fondo blanco para el cuerpo */
+    }
+
+    /* Aplicar colores a los mensajes */
+    .mensaje-verificado {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #5C8001; /* Verde oliva para mensajes */
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    .mensaje-verificado-success {
+        color: #7CB518; /* Verde brillante para mensaje de éxito */
+    }
+
+    /* Animación para el navbar al hacer scroll */
+    .custom-navbar {
+        transition: background-color 0.3s ease-in-out;
+    }
+
+    .top-rower {
+        padding: 20px;
+    }
+
+    .mt-5 {
+        margin-top: 5rem;
+    }
+</style>
+
+<script>
+    window.addEventListener('scroll', function () {
+        const navbar = document.querySelector('.custom-navbar');
+        if (window.scrollY > 10) {
+            navbar.classList.add('scrolled');
+        } else {
+            navbar.classList.remove('scrolled');
+        }
+    });
+</script>

@@ -1,0 +1,198 @@
+﻿@page "/usuarios"
+@inject NavigationManager NavigationManager
+@inject UsuarioServices UsuarioServices
+
+<style>
+    /* Título de la página */
+    .titulo-lista {
+        font-size: 2.5rem;
+        color: #FF9F1C; /* Naranja */
+        font-weight: bold;
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    /* Mensaje cuando no hay usuarios */
+    .mensaje-no-usuarios {
+        font-size: 1.2rem;
+        color: #FFBF69; /* Amarillo pastel */
+        text-align: center;
+    }
+
+    /* Estilo para la tabla */
+    .table-custom {
+        width: 100%;
+        border-collapse: collapse;
+        background-color: #FFFFFF; /* Blanco */
+        margin-top: 20px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Sombra sutil */
+    }
+
+        .table-custom th, .table-custom td {
+            padding: 12px 15px;
+            text-align: left;
+            border: 1px solid #CBF3F0; /* Verde agua */
+        }
+
+        .table-custom th {
+            background-color: #FF9F1C; /* Naranja */
+            color: white;
+            font-weight: bold;
+        }
+
+        .table-custom tbody tr:hover {
+            background-color: #FFBF69; /* Amarillo pastel al pasar cursor */
+            cursor: pointer;
+        }
+
+    /* Estilo para los íconos de acción */
+    .action-icon {
+        font-size: 1.5rem;
+        cursor: pointer;
+        margin-right: 10px;
+        color: #2EC4B6; /* Verde azulado */
+        transition: color 0.3s ease;
+    }
+
+        .action-icon:hover {
+            color: #FF9F1C; /* Naranja al pasar el cursor */
+        }
+
+    /* Estilo para el contenedor de botones */
+    .button-container {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        margin-top: 20px;
+    }
+
+    .btn-back {
+        background-color: #2EC4B6; /* Verde azulado */
+        color: white;
+        border-radius: 50px;
+        padding: 8px 20px;
+        font-weight: bold;
+        font-size: 1rem;
+        transition: background-color 0.3s;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+        .btn-back:hover {
+            background-color: #29b0a8; /* Más oscuro al pasar cursor */
+        }
+
+    /* Estilo de la carga */
+    .loading-spinner {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 20px;
+    }
+</style>
+
+<h3 class="titulo-lista">Lista de Usuarios</h3>
+
+@if (isLoading)
+{
+    <div class="loading-spinner">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Cargando...</span>
+        </div>
+    </div>
+}
+else if (usuarios != null && usuarios.Any())
+{
+    <table class="table table-custom">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Apellido</th>
+                <th>Número de Cédula</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var usuario in usuarios)
+            {
+                <tr>
+                    <td>@usuario.Nombre</td>
+                    <td>@usuario.Apellido</td>
+                    <td>@usuario.NumeroCedula</td>
+                    <td>
+                        <!-- Iconos de acción para cada usuario -->
+                        <span class="action-icon" @onclick="() => VerDetalles(usuario.UsuarioId)">
+                            <i class="bi bi-eye-fill"></i>
+                        </span>
+                        <span class="action-icon" @onclick="() => EditarUsuario(usuario.UsuarioId)">
+                            <i class="bi bi-pencil-fill"></i>
+                        </span>
+                        <span class="action-icon" @onclick="() => EliminarUsuario(usuario.UsuarioId)">
+                            <i class="bi bi-trash-fill"></i>
+                        </span>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p class="mensaje-no-usuarios">No hay usuarios registrados.</p>
+}
+
+<div class="button-container">
+    <button type="button" class="btn-back" @onclick="VolverHome">Volver a Inicio</button>
+</div>
+
+@code {
+    private List<Usuario> usuarios;
+    private bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            isLoading = true;
+            usuarios = await UsuarioServices.Listar(u => true);
+            isLoading = false;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al cargar usuarios: {ex.Message}");
+            isLoading = false;
+        }
+    }
+
+    private void VerDetalles(int usuarioId)
+    {
+        NavigationManager.NavigateTo($"/usuario-detalles/{usuarioId}");
+    }
+
+    private void EditarUsuario(int usuarioId)
+    {
+        NavigationManager.NavigateTo($"/usuario-editar/{usuarioId}");
+    }
+
+    private void EliminarUsuario(int usuarioId)
+    {
+        // Aquí podemos confirmar la eliminación con un modal o directamente llamar al servicio
+        var confirmDelete = ConfirmarEliminacion(usuarioId);
+        if (confirmDelete)
+        {
+            // Lógica para eliminar el usuario
+            UsuarioServices.Eliminar(usuarioId);
+            usuarios = usuarios.Where(u => u.UsuarioId != usuarioId).ToList();
+        }
+    }
+
+    private bool ConfirmarEliminacion(int usuarioId)
+    {
+        // Aquí podrías agregar un modal de confirmación o utilizar algo como SweetAlert2 para confirmaciones
+        return true; // Simulamos una confirmación exitosa
+    }
+
+    private void VolverHome()
+    {
+        NavigationManager.NavigateTo("/");
+    }
+}
